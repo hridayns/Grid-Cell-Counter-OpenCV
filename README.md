@@ -2,7 +2,7 @@
 This project **counts grid cells** from spreadsheet-like images, even with slight variations in angles (~5 to 10 degrees). Will be extended to perform **OCR** on extracted text. 
 
 # Prerequisites and Installation
-- [**Python 3.6.3 or higher**]([https://www.python.org/downloads/)
+- [**Python 3.6.3 or higher**](https://www.python.org/downloads/)
 - **numPy 1.16.0 or higher**: `pip install numpy`
 - **OpenCV 3.4.0 or higher**: `pip install opencv-python`
 - **pandas 0.20.3 or higher**: `pip install pandas`
