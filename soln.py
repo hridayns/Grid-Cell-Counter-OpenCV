@@ -4,7 +4,6 @@ import cv2 as cv
 import pandas as pd
 from matplotlib import pyplot as plt
 
-
 root = os.getcwd()
 data_folder = 'input'
 data_path = os.path.join(root,data_folder)
@@ -26,9 +25,6 @@ def draw_hist(data,fn):
 	(n,bins,patches) = ax.hist(data)
 	fig.savefig(os.path.join(output_path,'hist-'+fn),bbox_inches='tight')
 	plt.close()
-	print(n)
-	print(bins)
-	print(patches)
 
 output_dict = {
 	'File': [],
@@ -39,26 +35,34 @@ for _,subfolders,files in os.walk(data_path):
 	for file in files:
 		print('{:-^50}'.format('FILE ' + file))
 		img_file = os.path.join(data_path,file)
-		if file in ['tiger.jpg','dice.jpg']:
-			continue
 		img = cv.imread(img_file)
+
 		gray_img = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
 		gray_data = gray_img.flatten()
 		hist_data = np.histogram(gray_data)
+
 		mx_freq_idx = np.argmax(hist_data[0])
-		t = hist_data[1][mx_freq_idx] # Lower value of the range of bin (x-axis) with the highest frequency (y-axis)
+		mn_freq_idx = np.argmin(hist_data[0])
+
+		t_mn = hist_data[1][mn_freq_idx+1] # Lower value of the range of bin (x-axis) with the highest frequency (y-axis)
+		t_mx = hist_data[1][mx_freq_idx]
+		# t = hist_data[1][mn_freq_idx] 
 		# print(hist_data[0].shape,hist_data[1].shape)
+		# print('max idx: {} ---> {} | min idx: {} ----> {}'.format(mx_freq_idx,t_mx,mn_freq_idx,t_mn))
 		# print(hist_data[0])
 		# print(hist_data[1])
-		# draw_hist(gray_data,file)
+		draw_hist(gray_data,file)
 		# edges = cv.Canny(gray_img,100,200) # Canny edge mask instead of blur and threshold to binary image?
-
 		blur_img = cv.GaussianBlur(gray_img, (5, 5), 0)
-		# (t, binary_img) = cv.threshold(blur_img, 200, 255, cv.THRESH_BINARY)
-		# (t, binary_img) = cv.threshold(blur_img, 240, 255, cv.THRESH_BINARY)
-		# (t, binary_img) = cv.threshold(blur_img,240,255, cv.THRESH_BINARY_INV)
-		(_, binary_img) = cv.threshold(blur_img,t,255, cv.THRESH_BINARY_INV)
+		(_, binary_img) = cv.threshold(blur_img,t_mx,255, cv.THRESH_BINARY_INV)
+
+		# (_, binary_img) = cv.threshold(blur_img, 200, 255, cv.THRESH_BINARY)
+		# (_, binary_img) = cv.threshold(blur_img, 240, 255, cv.THRESH_BINARY)
+		# (_, binary_img) = cv.threshold(blur_img,200,255, cv.THRESH_BINARY_INV)
+		# binary_img = cv.inRange(blur_img, t_mn,t_mx)
 		# binary_img = cv.adaptiveThreshold(img,255,cv.ADAPTIVE_THRESH_GAUSSIAN_C,cv.THRESH_BINARY,11,2)
+		
+
 		(_, contours, _) = cv.findContours(binary_img, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 
 		num_cells = len(contours) - 1
@@ -75,6 +79,6 @@ for _,subfolders,files in os.walk(data_path):
 		contour_img = cv.drawContours(img, contours, -1, (0, 0, 255), 3)
 		draw(contour_img,file)
 
-print(output_dict)
+# print(output_dict)
 df = pd.DataFrame(output_dict)
 df.to_csv(os.path.join(output_path,'output.csv'),index=False)#index_label='ID')
